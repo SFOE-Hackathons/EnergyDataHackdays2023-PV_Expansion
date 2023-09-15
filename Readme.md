@@ -9,6 +9,9 @@ With additional information on the pv systems such as installation date, audit d
 Data:
 https://drive.google.com/file/d/1LaHR35mKksVG_Df7v4XcKOhj8AX96QSu/view?usp=drive_link
 
+Data outer join:
+https://drive.google.com/file/d/1vMGYQ074SpODS25pIZktvXsNAdoxouqE/view?usp=sharing
+
 
 ### Data Description (only relevant features)
 | Feature  Name                           	| Description                                	| Description2 	|

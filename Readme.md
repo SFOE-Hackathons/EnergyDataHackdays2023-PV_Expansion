@@ -8,3 +8,21 @@ With additional information on the pv systems such as installation date, audit d
 
 Data:
 https://drive.google.com/file/d/1LaHR35mKksVG_Df7v4XcKOhj8AX96QSu/view?usp=drive_link
+
+
+### Data Description (only relevant features)
+| Feature  Name                           	| Description                                	| Description2 	|
+|-----------------------------------------	|--------------------------------------------	|--------------	|
+| kev_nr                                  	| id                                         	| chr          	|
+| auditdatum                              	| check if system exists                     	| dd.mm.yyyy   	|
+| kev_ibm_formular_beg_datum              	| date formular reaches pronovo              	| dd.mm.yyyy   	|
+| kev_ibm_meldung_komlpett_datum          	| date application is complete               	| dd.mm.yyyy   	|
+| kev_zweitkontrolle_datum                	| date the pv sytem is registered at pronovo 	| dd.mm.yyyy   	|
+| plz                                     	| zip code                                   	| int          	|
+| ort                                     	| municipality                               	| chr          	|
+| kanton                                  	| kanton                                     	| chr          	|
+| land                                    	| coutntry                                   	| chr          	|
+| realisierte_leistung_erstinbetriebnahme 	| first registered installed capacity in KW  	| float        	|
+| realisierte_leistung_inkl_erweiterungen 	| actual registered installed capacity in KW 	| float        	|
+| geplantes_inbetriebnahmedatum           	| planned putting into operation             	| dd.mm.yyyy   	|
+| inbetriebnahme                          	| putted into operation                      	| dd.mm.yyyy   	|

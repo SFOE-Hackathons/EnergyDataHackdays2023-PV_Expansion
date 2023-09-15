@@ -10,14 +10,29 @@ Data:
 https://drive.google.com/file/d/1LaHR35mKksVG_Df7v4XcKOhj8AX96QSu/view?usp=drive_link
 
 
+### Data Description (only relevant features)
+| Feature  Name                           	| Description                                	| Description2 	|
+|-----------------------------------------	|--------------------------------------------	|--------------	|
+| kev_nr                                  	| id                                         	| chr          	|
+| auditdatum                              	| on-site check if system exists                     	| dd.mm.yyyy   	|
+| kev_ibm_formular_beg_datum              	| date attestation reaches pronovo              	| dd.mm.yyyy   	|
+| kev_ibm_meldung_komlpett_datum          	| date attestation and all necessary documents reaches pronovo (can be udes as proxy for DB entry date)               	| dd.mm.yyyy   	|
+| kev_zweitkontrolle_datum                	| date payment of one-off compensation (einmalvergütung) 	| dd.mm.yyyy   	|
+| plz                                     	| zip code                                   	| int          	|
+| ort                                     	| municipality                               	| chr          	|
+| kanton                                  	| kanton                                     	| chr          	|
+| land                                    	| coutntry                                   	| chr          	|
+| realisierte_leistung_erstinbetriebnahme 	| first registered installed capacity in KW  	| float        	|
+| realisierte_leistung_inkl_erweiterungen 	| actual registered installed capacity in KW 	| float        	|
+| geplantes_inbetriebnahmedatum           	| planned putting into operation             	| dd.mm.yyyy   	|
+| inbetriebnahme                          	| putted into operation                      	| dd.mm.yyyy   	|
+
+
 
 ## Initial setup of development environment
 Create environment and install packages from requirements.txt:
 ````
-conda create -y --name ed2023-PV_Expansion python==3.10
-activate analysis-db-service
-# try installing packages using conda:
-conda install -y -q --name analysis-db-service -c conda-forge --file requirements.txt
-# if packages are missing from conda, install using pip instead:
-#pip install -f requirements.txt
+conda create -y --name EnergyDataHackdays2023-PV_Expansion python==3.10
+activate EnergyDataHackdays2023-PV_Expansion
+pip install -f requirements.txt
 ````

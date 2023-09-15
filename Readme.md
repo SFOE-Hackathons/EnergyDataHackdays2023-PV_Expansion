@@ -14,10 +14,10 @@ https://drive.google.com/file/d/1LaHR35mKksVG_Df7v4XcKOhj8AX96QSu/view?usp=drive
 | Feature  Name                           	| Description                                	| Description2 	|
 |-----------------------------------------	|--------------------------------------------	|--------------	|
 | kev_nr                                  	| id                                         	| chr          	|
-| auditdatum                              	| check if system exists                     	| dd.mm.yyyy   	|
-| kev_ibm_formular_beg_datum              	| date formular reaches pronovo              	| dd.mm.yyyy   	|
-| kev_ibm_meldung_komlpett_datum          	| date application is complete               	| dd.mm.yyyy   	|
-| kev_zweitkontrolle_datum                	| date the pv sytem is registered at pronovo 	| dd.mm.yyyy   	|
+| auditdatum                              	| on-site check if system exists                     	| dd.mm.yyyy   	|
+| kev_ibm_formular_beg_datum              	| date attestation reaches pronovo              	| dd.mm.yyyy   	|
+| kev_ibm_meldung_komlpett_datum          	| date attestation and all necessary documents reaches pronovo (can be udes as proxy for DB entry date)               	| dd.mm.yyyy   	|
+| kev_zweitkontrolle_datum                	| date payment of one-off compensation (einmalvergütung) 	| dd.mm.yyyy   	|
 | plz                                     	| zip code                                   	| int          	|
 | ort                                     	| municipality                               	| chr          	|
 | kanton                                  	| kanton                                     	| chr          	|

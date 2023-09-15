@@ -8,3 +8,16 @@ With additional information on the pv systems such as installation date, audit d
 
 Data:
 https://drive.google.com/file/d/1LaHR35mKksVG_Df7v4XcKOhj8AX96QSu/view?usp=drive_link
+
+
+
+## Initial setup of development environment
+Create environment and install packages from requirements.txt:
+````
+conda create -y --name ed2023-PV_Expansion python==3.10
+activate analysis-db-service
+# try installing packages using conda:
+conda install -y -q --name analysis-db-service -c conda-forge --file requirements.txt
+# if packages are missing from conda, install using pip instead:
+#pip install -f requirements.txt
+````

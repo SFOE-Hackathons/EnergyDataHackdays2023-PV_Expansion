@@ -6,12 +6,6 @@ Pronovo is the entity that provides a very good overview of installed pv systems
 
 With additional information on the pv systems such as installation date, audit date, date of entry into the database, we would like to identify patterns, trends and seasonalities in order to be able to better and continuously estimate the current status of the pv expansion.
 
-Data:
-https://drive.google.com/file/d/1LaHR35mKksVG_Df7v4XcKOhj8AX96QSu/view?usp=drive_link
-
-Data outer join:
-https://drive.google.com/file/d/1vMGYQ074SpODS25pIZktvXsNAdoxouqE/view?usp=sharing
-
 
 ### Data Description (only relevant features)
 | Feature  Name                           	| Description                                	| Description2 	|

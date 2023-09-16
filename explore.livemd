@@ -1,0 +1,210 @@
+<!-- livebook:{"app_settings":{"access_type":"public","output_type":"rich","show_source":true,"slug":"edh-pronovo"}} -->
+
+# EnergyDataHackdays 2023 - Challenge 04 - PV Expansion
+
+```elixir
+Mix.install([
+  {:explorer, "~> 0.7.0"},
+  {:kino, "~> 0.10.0"},
+  {:kino_explorer, "~> 0.1.10"},
+  {:kino_vega_lite, "~> 0.1.7"}
+])
+
+File.cd(__DIR__)
+
+alias Explorer.{DataFrame, Series}
+
+:ok
+```
+
+## Data load and prep
+
+```elixir
+require Explorer.DataFrame
+
+columns = [
+  "kev_nr",
+  "inbetriebnahme",
+  # "auditdatum",
+  # "kev_ibm_formular_beg_datum",
+  "kev_ibm_meldung_komlpett_datum",
+  # "kev_zweitkontrolle_datum",
+  "realisierte_leistung_inkl_erweiterungen",
+  "plz",
+  "kanton",
+  "name_netzbetreiber"
+]
+
+df =
+  "https://raw.githubusercontent.com/SFOE-Hackathons/EnergyDataHackdays2023-PV_Expansion/main/data/oehd_pronovo2.csv"
+  |> DataFrame.from_csv!(
+    columns: columns,
+    nil_values: ["NA"],
+    parse_dates: true
+  )
+  |> DataFrame.rename(
+    kev_ibm_meldung_komlpett_datum: "meldung_komlpett",
+    realisierte_leistung_inkl_erweiterungen: "capacity"
+  )
+  |> DataFrame.filter(is_not_nil(inbetriebnahme))
+  |> DataFrame.mutate(year: year(inbetriebnahme), capacity: cast(capacity * 1000, :integer))
+
+# |> DataFrame.mutate(installed_capacity: cast(installed_capacity, :float))
+# |> DataFrame.filter(kanton == "SG")
+
+:ok
+```
+
+```elixir
+require Explorer.DataFrame
+
+df
+|> DataFrame.filter(is_nil(meldung_komlpett))
+|> DataFrame.group_by(:year)
+|> DataFrame.summarise(installed_capacity: sum(capacity), count: count(kev_nr))
+|> DataFrame.arrange(year)
+|> Kino.Explorer.new(name: "installed capacity and installions count per year")
+
+:ok
+```
+
+```elixir
+require Explorer.DataFrame
+
+sfoe =
+  "https://raw.githubusercontent.com/SFOE-Hackathons/EnergyDataHackdays2023-PV_Expansion/main/data/installed_capacity_sfoe.csv"
+  |> DataFrame.from_csv!(
+    columns: ["date", "SFOE", "Estimate"],
+    nil_values: ["NA"],
+    parse_dates: true
+  )
+  |> DataFrame.rename(
+    SFOE: "capacity",
+    Estimate: "drop"
+  )
+  |> DataFrame.mutate(capacity: cast(capacity * 1000 * 1000, :integer))
+  |> DataFrame.filter(date <= ~D[2023-01-10])
+  |> DataFrame.filter(not drop)
+
+:ok
+```
+
+## Parameters
+
+```elixir
+input = Kino.Input.date("start date", default: ~D[2018-01-01])
+```
+
+```elixir
+start_date = Kino.Input.read(input)
+```
+
+```elixir
+require DataFrame
+
+df = DataFrame.filter(df, inbetriebnahme >= ^start_date)
+sfoe = DataFrame.filter(sfoe, date >= ^start_date)
+
+y0 =
+  sfoe
+  |> DataFrame.filter(date == ^start_date)
+  |> DataFrame.to_columns()
+  |> Map.get("capacity")
+  |> List.first()
+```
+
+```elixir
+# Kino.Explorer.new(df, name: "installations after #{start_date}")
+# Kino.Explorer.new(sfoe, name: "installed capacity (official SFOE number plus estimates)")
+```
+
+## Graphs
+
+```elixir
+require DataFrame
+
+by_installation =
+  df
+  |> DataFrame.filter(is_not_nil(inbetriebnahme))
+  # |> DataFrame.filter(is_not_nil(meldung_komlpett))
+  |> DataFrame.arrange(inbetriebnahme)
+  |> DataFrame.mutate(sum: cast(cumulative_sum(capacity * 1.2), :integer))
+  |> DataFrame.mutate(sum: sum + ^y0)
+
+Kino.Explorer.new(by_installation,
+  name: "graph data: installed capacity cumulative sum (over inbetriebnahme) y0: #{y0}"
+)
+```
+
+```elixir
+require DataFrame
+
+by_meldung_komlpett =
+  df
+  |> DataFrame.filter(is_not_nil(meldung_komlpett))
+  |> DataFrame.arrange(meldung_komlpett)
+  # |> DataFrame.arrange_with(&(&1["meldung_komlpett"] || &1["inbetriebnahme"]))
+  |> DataFrame.mutate(sum: cumulative_sum(capacity))
+  |> DataFrame.filter(inbetriebnahme > ~D[2018-01-01])
+
+:ok
+```
+
+```elixir
+VegaLite.new(width: 800, height: 400, title: "installed capacity (cumulative sum)")
+|> VegaLite.layers([
+  VegaLite.new()
+  |> VegaLite.data_from_values(by_installation, only: ["inbetriebnahme", "sum"])
+  |> VegaLite.mark(:line)
+  |> VegaLite.encode_field(:x, "inbetriebnahme", type: :temporal)
+  |> VegaLite.encode_field(:y, "sum", type: :quantitative),
+  # VegaLite.new()
+  # |> VegaLite.data_from_values(by_meldung_komlpett, only: ["meldung_komlpett", "sum"])
+  # |> VegaLite.mark(:line, color: "#990000")
+  # |> VegaLite.encode_field(:x, "meldung_komlpett", type: :temporal)
+  # |> VegaLite.encode_field(:y, "sum", type: :quantitative),
+  VegaLite.new()
+  |> VegaLite.data_from_values(sfoe, only: ["date", "capacity"])
+  |> VegaLite.mark(:line, color: "#00EE00")
+  |> VegaLite.encode_field(:x, "date", type: :temporal)
+  |> VegaLite.encode_field(:y, "capacity", type: :quantitative)
+])
+```
+
+```elixir
+VegaLite.new(width: 750, height: 400, title: "cumul")
+|> VegaLite.layers([
+  VegaLite.new()
+  |> VegaLite.data_from_values(by_installation, only: ["inbetriebnahme", "sum"])
+  |> VegaLite.mark(:line)
+  |> VegaLite.encode_field(:x, "inbetriebnahme", type: :temporal)
+  |> VegaLite.encode_field(:y, "sum", type: :quantitative),
+  VegaLite.new()
+  |> VegaLite.data_from_values(by_meldung_komlpett, only: ["meldung_komlpett", "sum"])
+  |> VegaLite.mark(:line, color: "#990000")
+  |> VegaLite.encode_field(:x, "meldung_komlpett", type: :temporal)
+  |> VegaLite.encode_field(:y, "sum", type: :quantitative)
+])
+
+:ok
+```
+
+<!-- livebook:{"attrs":{"chart_title":"installed capacity","height":200,"layers":[{"active":true,"chart_type":"point","color_field":null,"color_field_aggregate":null,"color_field_bin":null,"color_field_scale_scheme":null,"color_field_type":null,"data_variable":"df","geodata_color":"blue","latitude_field":null,"longitude_field":null,"x_field":"inbetriebnahme","x_field_aggregate":null,"x_field_bin":null,"x_field_scale_type":null,"x_field_type":"temporal","y_field":"capacity","y_field_aggregate":null,"y_field_bin":null,"y_field_scale_type":null,"y_field_type":"quantitative"}],"vl_alias":"Elixir.VegaLite","width":600},"chunks":null,"kind":"Elixir.KinoVegaLite.ChartCell","livebook_object":"smart_cell"} -->
+
+```elixir
+VegaLite.new(width: 600, height: 200, title: "installed capacity")
+|> VegaLite.data_from_values(df, only: ["inbetriebnahme", "capacity"])
+|> VegaLite.mark(:point)
+|> VegaLite.encode_field(:x, "inbetriebnahme", type: :temporal)
+|> VegaLite.encode_field(:y, "capacity", type: :quantitative)
+```
+
+<!-- livebook:{"attrs":{"chart_title":"installations","height":null,"layers":[{"active":true,"chart_type":"line","color_field":null,"color_field_aggregate":null,"color_field_bin":null,"color_field_scale_scheme":null,"color_field_type":null,"data_variable":"df","geodata_color":"blue","latitude_field":null,"longitude_field":null,"x_field":"inbetriebnahme","x_field_aggregate":null,"x_field_bin":null,"x_field_scale_type":null,"x_field_type":"temporal","y_field":"__count__","y_field_aggregate":null,"y_field_bin":null,"y_field_scale_type":null,"y_field_type":null}],"vl_alias":"Elixir.VegaLite","width":750},"chunks":null,"kind":"Elixir.KinoVegaLite.ChartCell","livebook_object":"smart_cell"} -->
+
+```elixir
+VegaLite.new(width: 750, title: "installations")
+|> VegaLite.data_from_values(df, only: ["inbetriebnahme"])
+|> VegaLite.mark(:line)
+|> VegaLite.encode_field(:x, "inbetriebnahme", type: :temporal)
+|> VegaLite.encode(:y, aggregate: :count)
+```
